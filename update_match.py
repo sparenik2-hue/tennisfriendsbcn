@@ -1,4 +1,14 @@
-// Firestore helper functions
+#!/usr/bin/env python3
+"""Update the tennis app for sets-based match recording."""
+
+import os
+
+root = "/Users/nsgavalab/.openclaw/workspace/tennis-ranking"
+
+# ── 1. Update db.ts ──
+db_path = os.path.join(root, "src/lib/db.ts")
+with open(db_path, "w") as f:
+    f.write('''// Firestore helper functions
 import { auth } from "./auth";
 import {
   getFirestore,
@@ -64,7 +74,6 @@ export async function recordMatch(
     if (s.player1 > s.player2) p1Sets++;
     else if (s.player2 > s.player1) p2Sets++;
   }
-  if (p1Sets === p2Sets) throw new Error("Match must have a winner (sets can't be tied)");
   const winnerId = p1Sets > p2Sets ? player1Id : player2Id;
 
   // Get current ratings
@@ -84,6 +93,9 @@ export async function recordMatch(
   const p1Won = winnerId === player1Id;
   const newRatingA = calculateNewRating(p1.elo, p2.elo, p1Won);
   const newRatingB = calculateNewRating(p2.elo, p1.elo, !p1Won);
+
+  const changeA = newRatingA - p1.elo;
+  const changeB = newRatingB - p2.elo;
 
   // Update player 1
   await updateDoc(doc(db, "players", player1Id), {
@@ -111,7 +123,7 @@ export async function recordMatch(
     player1Sets: p1Sets,
     player2Sets: p2Sets,
     winnerId,
-    eloChange: Math.abs(newRatingA - p1.elo),
+    eloChange: Math.abs(changeA),
     date: Timestamp.now(),
     recordedBy: user.uid,
   });
@@ -127,3 +139,29 @@ export async function getMatches(): Promise<Match[]> {
 export async function deletePlayer(playerId: string) {
   await deleteDoc(doc(db, "players", playerId));
 }
+''')
+
+# ── 2. Update elo.ts ──
+elo_path = os.path.join(root, "src/lib/elo.ts")
+with open(elo_path, "w") as f:
+    f.write('''// ELO Rating System for Tennis
+const K_FACTOR = 32;
+
+export function expectedScore(ratingA: number, ratingB: number): number {
+  return 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400));
+}
+
+export function calculateNewRating(
+  oldRating: number,
+  opponentRating: number,
+  won: boolean
+): number {
+  const expected = expectedScore(oldRating, opponentRating);
+  const score = won ? 1 : 0;
+  return Math.round(oldRating + K_FACTOR * (score - expected));
+}
+
+export const DEFAULT_ELO = 1200;
+''')
+
+print("✅ db.ts and elo.ts updated")

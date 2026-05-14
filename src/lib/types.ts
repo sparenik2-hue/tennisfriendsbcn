@@ -11,14 +11,20 @@ export interface Player {
   createdBy: string;
 }
 
+export interface SetScore {
+  player1: number;
+  player2: number;
+}
+
 export interface Match {
   id: string;
   player1Id: string;
   player2Id: string;
   player1Name: string;
   player2Name: string;
-  player1Score: number;
-  player2Score: number;
+  sets: SetScore[];
+  player1Sets: number;
+  player2Sets: number;
   winnerId: string;
   eloChange: number;
   date: Date;
