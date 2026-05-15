@@ -134,6 +134,8 @@ export default function DashboardPage() {
 
   if (!user) return null;
 
+  const isAdmin = user.email === "sparenik2@gmail.com";
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -144,7 +146,10 @@ export default function DashboardPage() {
             <h1 className="text-xl font-bold text-gray-800">TennisFriendsBCN</h1>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">{user.email}</span>
+            <span className="text-sm text-gray-500">
+              {user.email}
+              {isAdmin && <span className="ml-1.5 text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Admin</span>}
+            </span>
             <button onClick={handleLogout} className="p-2 hover:bg-gray-100 rounded-lg">
               <LogOut className="w-5 h-5 text-gray-500" />
             </button>
@@ -224,15 +229,17 @@ export default function DashboardPage() {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-semibold text-gray-800 text-lg">👥 Players</h2>
-              <button
-                onClick={() => setShowAddPlayer(true)}
-                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              >
-                <Plus className="w-4 h-4" /> Add Player
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => setShowAddPlayer(true)}
+                  className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <Plus className="w-4 h-4" /> Add Player
+                </button>
+              )}
             </div>
 
-            {showAddPlayer && (
+            {isAdmin && showAddPlayer && (
               <form onSubmit={handleAddPlayer} className="bg-white p-4 rounded-xl shadow-sm border mb-4 flex gap-3">
                 <input
                   value={newPlayerName}
@@ -256,9 +263,11 @@ export default function DashboardPage() {
                     <p className="font-medium">{p.name}</p>
                     <p className="text-xs text-gray-400">ELO {p.elo} · {p.matchesPlayed} matches</p>
                   </div>
-                  <button onClick={() => handleDeletePlayer(p.id)} className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {isAdmin && (
+                    <button onClick={() => handleDeletePlayer(p.id)} className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
