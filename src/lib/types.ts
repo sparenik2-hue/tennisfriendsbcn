@@ -1,4 +1,4 @@
-// Tennis Ranking App - Data types
+// TennisFriendsBCN - Data types
 
 export interface Player {
   id: string;

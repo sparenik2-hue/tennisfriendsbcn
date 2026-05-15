@@ -1,4 +1,4 @@
-// ELO Rating System for Tennis
+// ELO Rating System (TennisFriendsBCN)
 const K_FACTOR = 32;
 
 export function expectedScore(ratingA: number, ratingB: number): number {

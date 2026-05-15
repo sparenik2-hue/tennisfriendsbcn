@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tennis Ranking",
-  description: "Track your club tennis rankings with ELO ratings",
+  title: "TennisFriendsBCN",
+  description: "Tennis rankings for your Barcelona friend group",
 };
 
 export default function RootLayout({
