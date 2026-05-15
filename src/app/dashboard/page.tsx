@@ -7,6 +7,14 @@ import { getPlayers, getMatches, addPlayer, recordMatch, deletePlayer } from "@/
 import type { Player, Match, SetScore } from "@/lib/types";
 import { Trophy, Users, Swords, LogOut, Trash2, Plus, X, Minus, Plus as PlusIcon } from "lucide-react";
 
+function getLastMatchResult(playerId: string, matches: Match[]): "won" | "lost" | null {
+  const lastMatch = matches.find(
+    (m) => m.player1Id === playerId || m.player2Id === playerId
+  );
+  if (!lastMatch) return null;
+  return lastMatch.winnerId === playerId ? "won" : "lost";
+}
+
 export default function DashboardPage() {
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -189,7 +197,15 @@ export default function DashboardPage() {
                       {i + 1}
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-gray-800">{p.name}</p>
+                      <p className="font-medium text-gray-800">
+                        {p.name}
+                        {(() => {
+                          const result = getLastMatchResult(p.id, matches);
+                          if (result === "won") return <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500 ml-2" title="Won last match" />;
+                          if (result === "lost") return <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500 ml-2" title="Lost last match" />;
+                          return null;
+                        })()}
+                      </p>
                       <p className="text-xs text-gray-400">{p.wins}W - {p.losses}L ({p.matchesPlayed} matches)</p>
                     </div>
                     <div className="text-right">
