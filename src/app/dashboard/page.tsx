@@ -442,36 +442,35 @@ export default function DashboardPage() {
             <div className="space-y-3">
               {matches.map((m) => {
                 const p1Won = m.winnerId === m.player1Id;
+                const matchDate = new Date(m.date as any).toLocaleDateString("en-GB", {
+                  weekday: "short",
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                });
                 return (
                   <div key={m.id} className="bg-white p-4 rounded-xl shadow-sm border">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`font-semibold ${p1Won ? "text-emerald-700" : "text-gray-500"}`}>
-                            {m.player1Name} {p1Won && "👑"}
-                          </span>
-                          <span className="text-gray-300 text-sm">vs</span>
-                          <span className={`font-semibold ${!p1Won ? "text-emerald-700" : "text-gray-500"}`}>
-                            {m.player2Name} {!p1Won && "👑"}
-                          </span>
-                        </div>
-                        {/* Set scores display */}
-                        <div className="flex gap-3 mt-1">
-                          {m.sets?.map((set, i) => (
-                            <span key={i} className={`text-sm px-2 py-0.5 rounded ${
-                              p1Won
-                                ? (set.player1 > set.player2 ? "bg-emerald-50 text-emerald-700 font-medium" : "bg-gray-50 text-gray-400")
-                                : (set.player2 > set.player1 ? "bg-emerald-50 text-emerald-700 font-medium" : "bg-gray-50 text-gray-400")
-                            }`}>
-                              {set.player1}-{set.player2}
-                            </span>
-                          ))}
-                        </div>
-                        <p className="text-xs text-gray-400 mt-1">ELO change: ±{m.eloChange}</p>
-                      </div>
-                      <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
-                        {new Date(m.date as any).toLocaleDateString()}
+                    <div className="text-xs text-gray-400 mb-2">{matchDate}</div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`font-semibold ${p1Won ? "text-emerald-700" : "text-gray-500"}`}>
+                        {m.player1Name} {p1Won && "👑"}
                       </span>
+                      <span className="text-gray-300 text-sm">vs</span>
+                      <span className={`font-semibold ${!p1Won ? "text-emerald-700" : "text-gray-500"}`}>
+                        {m.player2Name} {!p1Won && "👑"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      {m.sets?.map((set, i) => (
+                        <span key={i} className={`text-sm px-2 py-0.5 rounded ${
+                          p1Won
+                            ? (set.player1 > set.player2 ? "bg-emerald-50 text-emerald-700 font-medium" : "bg-gray-50 text-gray-400")
+                            : (set.player2 > set.player1 ? "bg-emerald-50 text-emerald-700 font-medium" : "bg-gray-50 text-gray-400")
+                        }`}>
+                          {set.player1}-{set.player2}
+                        </span>
+                      ))}
+                      <span className="text-xs text-gray-400 ml-1">· ±{m.eloChange} ELO</span>
                     </div>
                   </div>
                 );
