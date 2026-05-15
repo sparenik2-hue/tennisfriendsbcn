@@ -23,12 +23,13 @@ const db = getFirestore(app);
 
 // ── Players ──
 
-export async function addPlayer(name: string): Promise<string> {
+export async function addPlayer(name: string, icon: string = "🎾"): Promise<string> {
   const user = auth.currentUser;
   if (!user) throw new Error("Not authenticated");
 
   const ref = await addDoc(collection(db, "players"), {
     name,
+    icon,
     elo: DEFAULT_ELO,
     matchesPlayed: 0,
     wins: 0,
@@ -126,4 +127,8 @@ export async function getMatches(): Promise<Match[]> {
 
 export async function deletePlayer(playerId: string) {
   await deleteDoc(doc(db, "players", playerId));
+}
+
+export async function updatePlayerIcon(playerId: string, icon: string) {
+  await updateDoc(doc(db, "players", playerId), { icon });
 }
