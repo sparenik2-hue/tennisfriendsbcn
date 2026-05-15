@@ -201,8 +201,8 @@ export default function DashboardPage() {
                         {p.name}
                         {(() => {
                           const result = getLastMatchResult(p.id, matches);
-                          if (result === "won") return <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500 ml-2" title="Won last match" />;
-                          if (result === "lost") return <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500 ml-2" title="Lost last match" />;
+                          if (result === "won") return <span className="text-green-500 ml-1.5 font-bold" title="Won last match">↑</span>;
+                          if (result === "lost") return <span className="text-red-500 ml-1.5 font-bold" title="Lost last match">↓</span>;
                           return null;
                         })()}
                       </p>
