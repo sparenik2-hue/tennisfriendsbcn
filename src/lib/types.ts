@@ -35,3 +35,22 @@ export interface Match {
 export type RankingEntry = Player & {
   rank: number;
 };
+
+export interface TournamentParticipant {
+  uid: string;
+  email: string;
+}
+
+export interface Tournament {
+  id: string;
+  name: string;
+  description: string;
+  date: Date;
+  location: string;
+  format: "singles" | "doubles";
+  maxPlayers: number;
+  participants: TournamentParticipant[];
+  status: "upcoming" | "active" | "completed";
+  createdBy: string;
+  createdAt: Date;
+}

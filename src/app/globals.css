@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
 }
 
 @theme inline {
@@ -13,12 +13,40 @@
 }
 
 body {
-  background: #f9fafb;
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
-/* Hide scrollbar for clean look */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-fade-up  { animation: fade-up  0.45s cubic-bezier(.22,1,.36,1) both; }
+.animate-scale-in { animation: scale-in 0.3s  cubic-bezier(.22,1,.36,1) both; }
+
+.delay-50  { animation-delay: 0.05s; }
+.delay-100 { animation-delay: 0.10s; }
+.delay-150 { animation-delay: 0.15s; }
+.delay-200 { animation-delay: 0.20s; }
+.delay-300 { animation-delay: 0.30s; }
+
+.stat-number { font-variant-numeric: tabular-nums; letter-spacing: -0.04em; }
+
+/* Win-rate bar fill transition */
+.bar-fill { transition: width 0.6s cubic-bezier(.22,1,.36,1); }

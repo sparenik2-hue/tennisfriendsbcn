@@ -12,10 +12,12 @@ import {
   where,
   Timestamp,
   deleteDoc,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import { initializeApp, getApps } from "firebase/app";
 import firebaseConfig from "./firebase";
-import { Player, Match, SetScore } from "./types";
+import { Player, Match, SetScore, Tournament, TournamentParticipant } from "./types";
 import { calculateNewRating, DEFAULT_ELO } from "./elo";
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
@@ -131,4 +133,66 @@ export async function deletePlayer(playerId: string) {
 
 export async function updatePlayerIcon(playerId: string, icon: string) {
   await updateDoc(doc(db, "players", playerId), { icon });
+}
+
+// ── Tournaments ──
+
+export async function createTournament(data: {
+  name: string;
+  description: string;
+  date: Date;
+  location: string;
+  format: "singles" | "doubles";
+  maxPlayers: number;
+}): Promise<string> {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Not authenticated");
+
+  const ref = await addDoc(collection(db, "tournaments"), {
+    ...data,
+    date: Timestamp.fromDate(data.date),
+    participants: [],
+    status: "upcoming",
+    createdBy: user.uid,
+    createdAt: Timestamp.now(),
+  });
+  return ref.id;
+}
+
+export async function getTournaments(): Promise<Tournament[]> {
+  const snap = await getDocs(
+    query(collection(db, "tournaments"), orderBy("date", "asc"))
+  );
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Tournament));
+}
+
+export async function joinTournament(tournamentId: string): Promise<void> {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Not authenticated");
+
+  const participant: TournamentParticipant = { uid: user.uid, email: user.email || "" };
+  await updateDoc(doc(db, "tournaments", tournamentId), {
+    participants: arrayUnion(participant),
+  });
+}
+
+export async function leaveTournament(tournamentId: string): Promise<void> {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Not authenticated");
+
+  const participant: TournamentParticipant = { uid: user.uid, email: user.email || "" };
+  await updateDoc(doc(db, "tournaments", tournamentId), {
+    participants: arrayRemove(participant),
+  });
+}
+
+export async function deleteTournament(tournamentId: string): Promise<void> {
+  await deleteDoc(doc(db, "tournaments", tournamentId));
+}
+
+export async function updateTournamentStatus(
+  tournamentId: string,
+  status: "upcoming" | "active" | "completed"
+): Promise<void> {
+  await updateDoc(doc(db, "tournaments", tournamentId), { status });
 }
