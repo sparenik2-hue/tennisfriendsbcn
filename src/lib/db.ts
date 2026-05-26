@@ -100,6 +100,10 @@ export async function updatePlayerIcon(playerId: string, icon: string) {
   await updateDoc(doc(db, "players", playerId), { icon });
 }
 
+export async function updatePlayerPlaytomic(playerId: string, playtomicUsername: string) {
+  await updateDoc(doc(db, "players", playerId), { playtomicUsername: playtomicUsername.trim() });
+}
+
 // ── Tournaments ───────────────────────────────────────────────────────────
 
 export async function createTournament(data: {

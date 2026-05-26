@@ -8,6 +8,7 @@ export interface Player {
   matchesPlayed: number;
   wins: number;
   losses: number;
+  playtomicUsername?: string;
   createdAt: Date;
   createdBy: string;
 }

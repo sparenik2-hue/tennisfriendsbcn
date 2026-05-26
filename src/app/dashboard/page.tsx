@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   getPlayers, getMatches, addPlayer, recordMatch, deletePlayer, updatePlayerIcon,
+  updatePlayerPlaytomic,
   getTournaments, createTournament, joinTournament, leaveTournament,
   deleteTournament, updateTournamentStatus,
   generateTournamentSchedule, getTournamentMatches,
@@ -18,6 +19,7 @@ import {
   Trophy, Users, Swords, LogOut, Trash2, Plus,
   Minus, Plus as PlusIcon, TrendingUp, TrendingDown,
   CalendarDays, MapPin, MessageCircle, Zap, ChevronDown, ChevronUp,
+  ExternalLink, Pencil, Check, X,
 } from "lucide-react";
 
 const WHATSAPP_GROUP_LINK = "https://chat.whatsapp.com/YOUR_INVITE_CODE_HERE";
@@ -58,6 +60,23 @@ function getPlayerIcon(playerId: string, players: Player[]) {
 
 // ── Ranking sub-components ────────────────────────────────────────────────
 
+function PlaytomicBadge({ username, light = false }: { username: string; light?: boolean }) {
+  return (
+    <a
+      href={`https://app.playtomic.io/user/${username}`}
+      target="_blank" rel="noopener noreferrer"
+      onClick={e => e.stopPropagation()}
+      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full transition-opacity hover:opacity-80 ${
+        light
+          ? "bg-white/25 text-white border border-white/30"
+          : "bg-green-50 text-green-700 border border-green-200"
+      }`}
+    >
+      <span>🎾</span> {username} <ExternalLink className="w-2.5 h-2.5" />
+    </a>
+  );
+}
+
 function GoldCard({ p, result }: { p: Player; result: "won" | "lost" | null }) {
   const pct = winPct(p.wins, p.matchesPlayed);
   return (
@@ -75,11 +94,12 @@ function GoldCard({ p, result }: { p: Player; result: "won" | "lost" | null }) {
           </div>
           <span className="text-4xl shrink-0 drop-shadow">{p.icon || "🎾"}</span>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xl font-black text-amber-950 truncate">{p.name}</span>
               <span className="text-base">👑</span>
               {result === "won"  && <TrendingUp   className="w-4 h-4 text-amber-800 shrink-0" />}
               {result === "lost" && <TrendingDown  className="w-4 h-4 text-amber-700 shrink-0" />}
+              {p.playtomicUsername && <PlaytomicBadge username={p.playtomicUsername} light />}
             </div>
             <div className="text-sm text-amber-800 font-medium mt-0.5">
               {p.wins}W · {p.losses}L · {getWinRateLabel(p.wins, p.matchesPlayed)} win rate · {p.matchesPlayed} matches
@@ -120,10 +140,11 @@ function MedalCard({ p, rank, result }: { p: Player; rank: 2 | 3; result: "won" 
           </div>
           <span className="text-3xl shrink-0">{p.icon || "🎾"}</span>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className={`font-black text-base ${textMain} truncate`}>{p.name}</span>
               {result === "won"  && <TrendingUp  className={`w-3.5 h-3.5 ${textSub} shrink-0`} />}
               {result === "lost" && <TrendingDown className={`w-3.5 h-3.5 ${textSub} shrink-0`} />}
+              {p.playtomicUsername && <PlaytomicBadge username={p.playtomicUsername} light />}
             </div>
             <div className={`text-xs ${textSub} font-medium`}>
               {p.wins}W · {p.losses}L · {getWinRateLabel(p.wins, p.matchesPlayed)}
@@ -152,10 +173,11 @@ function RankCard({ p, rank, result }: { p: Player; rank: number; result: "won" 
         </div>
         <span className="text-2xl shrink-0">{p.icon || "🎾"}</span>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span className="font-bold text-gray-800 truncate">{p.name}</span>
             {result === "won"  && <TrendingUp  className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
             {result === "lost" && <TrendingDown className="w-3.5 h-3.5 text-red-400 shrink-0" />}
+            {p.playtomicUsername && <PlaytomicBadge username={p.playtomicUsername} />}
           </div>
           <div className="flex items-center gap-1.5 mt-1">
             <div className="h-1 flex-1 bg-gray-100 rounded-full overflow-hidden">
@@ -215,7 +237,9 @@ export default function DashboardPage() {
   const [showAddTournament, setShowAddTournament] = useState(false);
   const [newPlayerName,     setNewPlayerName]     = useState("");
   const [newPlayerIcon,     setNewPlayerIcon]     = useState("🎾");
-  const [editIconPlayerId,  setEditIconPlayerId]  = useState<string | null>(null);
+  const [editIconPlayerId,      setEditIconPlayerId]      = useState<string | null>(null);
+  const [editPlaytomicId,       setEditPlaytomicId]       = useState<string | null>(null);
+  const [playtomicInput,        setPlaytomicInput]        = useState("");
   const [activeTab, setActiveTab] = useState<"rankings" | "players" | "matches" | "tournaments">("rankings");
 
   // Match form
@@ -271,6 +295,11 @@ export default function DashboardPage() {
   };
   const handleChangeIcon = async (pid: string, icon: string) => {
     await updatePlayerIcon(pid, icon); setEditIconPlayerId(null); loadData();
+  };
+
+  const handleSavePlaytomic = async (pid: string) => {
+    await updatePlayerPlaytomic(pid, playtomicInput);
+    setEditPlaytomicId(null); setPlaytomicInput(""); loadData();
   };
 
   // ── Match handlers ──
@@ -530,6 +559,35 @@ export default function DashboardPage() {
                           <div className="h-full bg-emerald-400 rounded-full bar-fill" style={{ width: `${winPct(p.wins, p.matchesPlayed)}%` }} />
                         </div>
                         <span className="text-xs text-gray-400 shrink-0">{p.wins}W {p.losses}L · {getWinRateLabel(p.wins, p.matchesPlayed)}</span>
+                      </div>
+                      <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                        {editPlaytomicId === p.id ? (
+                          <>
+                            <input
+                              autoFocus
+                              value={playtomicInput}
+                              onChange={e => setPlaytomicInput(e.target.value)}
+                              placeholder="Playtomic username"
+                              className="text-xs px-2 py-1 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 bg-white w-36"
+                              onKeyDown={e => { if (e.key === "Enter") handleSavePlaytomic(p.id); if (e.key === "Escape") { setEditPlaytomicId(null); setPlaytomicInput(""); } }}
+                            />
+                            <button onClick={() => handleSavePlaytomic(p.id)} className="p-1 hover:bg-emerald-50 rounded-lg text-emerald-600"><Check className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => { setEditPlaytomicId(null); setPlaytomicInput(""); }} className="p-1 hover:bg-gray-50 rounded-lg text-gray-400"><X className="w-3.5 h-3.5" /></button>
+                          </>
+                        ) : (
+                          <>
+                            {p.playtomicUsername && <PlaytomicBadge username={p.playtomicUsername} />}
+                            {isAdmin && (
+                              <button
+                                onClick={() => { setEditPlaytomicId(p.id); setPlaytomicInput(p.playtomicUsername ?? ""); }}
+                                className="p-1 hover:bg-gray-100 rounded-lg text-gray-300 hover:text-emerald-600 transition-all"
+                                title={p.playtomicUsername ? "Edit Playtomic" : "Add Playtomic"}
+                              >
+                                <Pencil className="w-3 h-3" />
+                              </button>
+                            )}
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="text-right shrink-0 px-2">
