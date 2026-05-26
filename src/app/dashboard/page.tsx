@@ -60,10 +60,10 @@ function getPlayerIcon(playerId: string, players: Player[]) {
 
 // ── Ranking sub-components ────────────────────────────────────────────────
 
-function PlaytomicBadge({ username, light = false }: { username: string; light?: boolean }) {
+function PlaytomicBadge({ url, light = false }: { url: string; light?: boolean }) {
   return (
     <a
-      href={`https://app.playtomic.io/user/${username}`}
+      href={url}
       target="_blank" rel="noopener noreferrer"
       onClick={e => e.stopPropagation()}
       className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full transition-opacity hover:opacity-80 ${
@@ -72,7 +72,7 @@ function PlaytomicBadge({ username, light = false }: { username: string; light?:
           : "bg-green-50 text-green-700 border border-green-200"
       }`}
     >
-      <span>🎾</span> {username} <ExternalLink className="w-2.5 h-2.5" />
+      <span>🎾</span> Playtomic <ExternalLink className="w-2.5 h-2.5" />
     </a>
   );
 }
@@ -99,7 +99,7 @@ function GoldCard({ p, result }: { p: Player; result: "won" | "lost" | null }) {
               <span className="text-base">👑</span>
               {result === "won"  && <TrendingUp   className="w-4 h-4 text-amber-800 shrink-0" />}
               {result === "lost" && <TrendingDown  className="w-4 h-4 text-amber-700 shrink-0" />}
-              {p.playtomicUsername && <PlaytomicBadge username={p.playtomicUsername} light />}
+              {p.playtomicUrl && <PlaytomicBadge url={p.playtomicUrl} light />}
             </div>
             <div className="text-sm text-amber-800 font-medium mt-0.5">
               {p.wins}W · {p.losses}L · {getWinRateLabel(p.wins, p.matchesPlayed)} win rate · {p.matchesPlayed} matches
@@ -144,7 +144,7 @@ function MedalCard({ p, rank, result }: { p: Player; rank: 2 | 3; result: "won" 
               <span className={`font-black text-base ${textMain} truncate`}>{p.name}</span>
               {result === "won"  && <TrendingUp  className={`w-3.5 h-3.5 ${textSub} shrink-0`} />}
               {result === "lost" && <TrendingDown className={`w-3.5 h-3.5 ${textSub} shrink-0`} />}
-              {p.playtomicUsername && <PlaytomicBadge username={p.playtomicUsername} light />}
+              {p.playtomicUrl && <PlaytomicBadge url={p.playtomicUrl} light />}
             </div>
             <div className={`text-xs ${textSub} font-medium`}>
               {p.wins}W · {p.losses}L · {getWinRateLabel(p.wins, p.matchesPlayed)}
@@ -177,7 +177,7 @@ function RankCard({ p, rank, result }: { p: Player; rank: number; result: "won" 
             <span className="font-bold text-gray-800 truncate">{p.name}</span>
             {result === "won"  && <TrendingUp  className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
             {result === "lost" && <TrendingDown className="w-3.5 h-3.5 text-red-400 shrink-0" />}
-            {p.playtomicUsername && <PlaytomicBadge username={p.playtomicUsername} />}
+            {p.playtomicUrl && <PlaytomicBadge url={p.playtomicUrl} />}
           </div>
           <div className="flex items-center gap-1.5 mt-1">
             <div className="h-1 flex-1 bg-gray-100 rounded-full overflow-hidden">
@@ -567,7 +567,7 @@ export default function DashboardPage() {
                               autoFocus
                               value={playtomicInput}
                               onChange={e => setPlaytomicInput(e.target.value)}
-                              placeholder="Playtomic username"
+                              placeholder="Paste Playtomic profile URL"
                               className="text-xs px-2 py-1 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 bg-white w-36"
                               onKeyDown={e => { if (e.key === "Enter") handleSavePlaytomic(p.id); if (e.key === "Escape") { setEditPlaytomicId(null); setPlaytomicInput(""); } }}
                             />
@@ -576,12 +576,12 @@ export default function DashboardPage() {
                           </>
                         ) : (
                           <>
-                            {p.playtomicUsername && <PlaytomicBadge username={p.playtomicUsername} />}
+                            {p.playtomicUrl && <PlaytomicBadge url={p.playtomicUrl} />}
                             {isAdmin && (
                               <button
-                                onClick={() => { setEditPlaytomicId(p.id); setPlaytomicInput(p.playtomicUsername ?? ""); }}
+                                onClick={() => { setEditPlaytomicId(p.id); setPlaytomicInput(p.playtomicUrl ?? ""); }}
                                 className="p-1 hover:bg-gray-100 rounded-lg text-gray-300 hover:text-emerald-600 transition-all"
-                                title={p.playtomicUsername ? "Edit Playtomic" : "Add Playtomic"}
+                                title={p.playtomicUrl ? "Edit Playtomic" : "Add Playtomic"}
                               >
                                 <Pencil className="w-3 h-3" />
                               </button>
