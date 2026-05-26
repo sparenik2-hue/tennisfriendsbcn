@@ -14,6 +14,7 @@ import {
   Timestamp,
   deleteDoc,
   writeBatch,
+  deleteField,
 } from "firebase/firestore";
 import { initializeApp, getApps } from "firebase/app";
 import firebaseConfig from "./firebase";
@@ -101,7 +102,8 @@ export async function updatePlayerIcon(playerId: string, icon: string) {
 }
 
 export async function updatePlayerPlaytomic(playerId: string, playtomicUrl: string) {
-  await updateDoc(doc(db, "players", playerId), { playtomicUrl: playtomicUrl.trim() });
+  const val = playtomicUrl.trim();
+  await updateDoc(doc(db, "players", playerId), { playtomicUrl: val || deleteField() });
 }
 
 // ── Tournaments ───────────────────────────────────────────────────────────

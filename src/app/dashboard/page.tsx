@@ -99,7 +99,7 @@ function GoldCard({ p, result }: { p: Player; result: "won" | "lost" | null }) {
               <span className="text-base">👑</span>
               {result === "won"  && <TrendingUp   className="w-4 h-4 text-amber-800 shrink-0" />}
               {result === "lost" && <TrendingDown  className="w-4 h-4 text-amber-700 shrink-0" />}
-              {p.playtomicUrl && <PlaytomicBadge url={p.playtomicUrl} light />}
+              {p.playtomicUrl?.startsWith("http") && <PlaytomicBadge url={p.playtomicUrl} light />}
             </div>
             <div className="text-sm text-amber-800 font-medium mt-0.5">
               {p.wins}W · {p.losses}L · {getWinRateLabel(p.wins, p.matchesPlayed)} win rate · {p.matchesPlayed} matches
@@ -144,7 +144,7 @@ function MedalCard({ p, rank, result }: { p: Player; rank: 2 | 3; result: "won" 
               <span className={`font-black text-base ${textMain} truncate`}>{p.name}</span>
               {result === "won"  && <TrendingUp  className={`w-3.5 h-3.5 ${textSub} shrink-0`} />}
               {result === "lost" && <TrendingDown className={`w-3.5 h-3.5 ${textSub} shrink-0`} />}
-              {p.playtomicUrl && <PlaytomicBadge url={p.playtomicUrl} light />}
+              {p.playtomicUrl?.startsWith("http") && <PlaytomicBadge url={p.playtomicUrl} light />}
             </div>
             <div className={`text-xs ${textSub} font-medium`}>
               {p.wins}W · {p.losses}L · {getWinRateLabel(p.wins, p.matchesPlayed)}
@@ -177,7 +177,7 @@ function RankCard({ p, rank, result }: { p: Player; rank: number; result: "won" 
             <span className="font-bold text-gray-800 truncate">{p.name}</span>
             {result === "won"  && <TrendingUp  className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
             {result === "lost" && <TrendingDown className="w-3.5 h-3.5 text-red-400 shrink-0" />}
-            {p.playtomicUrl && <PlaytomicBadge url={p.playtomicUrl} />}
+            {p.playtomicUrl?.startsWith("http") && <PlaytomicBadge url={p.playtomicUrl} />}
           </div>
           <div className="flex items-center gap-1.5 mt-1">
             <div className="h-1 flex-1 bg-gray-100 rounded-full overflow-hidden">
@@ -298,7 +298,9 @@ export default function DashboardPage() {
   };
 
   const handleSavePlaytomic = async (pid: string) => {
-    await updatePlayerPlaytomic(pid, playtomicInput);
+    let val = playtomicInput.trim();
+    if (val && !val.startsWith("http")) val = "https://" + val;
+    await updatePlayerPlaytomic(pid, val);
     setEditPlaytomicId(null); setPlaytomicInput(""); loadData();
   };
 
@@ -567,7 +569,7 @@ export default function DashboardPage() {
                               autoFocus
                               value={playtomicInput}
                               onChange={e => setPlaytomicInput(e.target.value)}
-                              placeholder="Paste Playtomic profile URL"
+                              placeholder="https://app.playtomic.io/users/…"
                               className="text-xs px-2 py-1 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 bg-white w-36"
                               onKeyDown={e => { if (e.key === "Enter") handleSavePlaytomic(p.id); if (e.key === "Escape") { setEditPlaytomicId(null); setPlaytomicInput(""); } }}
                             />
@@ -576,7 +578,7 @@ export default function DashboardPage() {
                           </>
                         ) : (
                           <>
-                            {p.playtomicUrl && <PlaytomicBadge url={p.playtomicUrl} />}
+                            {p.playtomicUrl?.startsWith("http") && <PlaytomicBadge url={p.playtomicUrl} />}
                             {isAdmin && (
                               <button
                                 onClick={() => { setEditPlaytomicId(p.id); setPlaytomicInput(p.playtomicUrl ?? ""); }}
